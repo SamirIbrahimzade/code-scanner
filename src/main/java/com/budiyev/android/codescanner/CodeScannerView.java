@@ -26,7 +26,10 @@ package com.budiyev.android.codescanner;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.drawable.shapes.Shape;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
@@ -34,6 +37,8 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.AttrRes;
 import androidx.annotation.ColorInt;
@@ -77,6 +82,8 @@ public final class CodeScannerView extends ViewGroup {
     private int mAutoFocusButtonColor;
     private int mFlashButtonColor;
     private int mFocusAreaSize;
+    private ImageView mQrGalleryButton;
+    private TextView galleryText;
 
     /**
      * A view to display code scanner preview
@@ -121,8 +128,9 @@ public final class CodeScannerView extends ViewGroup {
         initialize(context, attrs, defStyleAttr, defStyleRes);
     }
 
+    @SuppressLint("SetTextI18n")
     private void initialize(@NonNull final Context context, @Nullable final AttributeSet attrs,
-            @AttrRes final int defStyleAttr, @StyleRes final int defStyleRes) {
+                            @AttrRes final int defStyleAttr, @StyleRes final int defStyleRes) {
         mPreviewView = new SurfaceView(context);
         mPreviewView.setLayoutParams(
                 new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
@@ -142,6 +150,26 @@ public final class CodeScannerView extends ViewGroup {
         mFlashButton.setScaleType(ImageView.ScaleType.CENTER);
         mFlashButton.setImageResource(R.drawable.ic_code_scanner_flash_on);
         mFlashButton.setOnClickListener(new FlashClickListener());
+
+        mQrGalleryButton = new ImageView(context);
+        mQrGalleryButton.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
+        mQrGalleryButton.setScaleType(ImageView.ScaleType.CENTER);
+        mQrGalleryButton.setImageResource(R.drawable.ic_qr_scan);
+        mQrGalleryButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Toast.makeText(context, "Not active yet", Toast.LENGTH_LONG).show();
+            }
+
+        });
+
+        galleryText = new TextView(context);
+        galleryText.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
+        galleryText.setText("Open Qr From Gallery");
+        galleryText.setTextSize(100);
+        galleryText.setTextColor(Color.WHITE);
+
+
         if (attrs == null) {
             mViewFinderView.setFrameAspectRatio(DEFAULT_FRAME_ASPECT_RATIO_WIDTH,
                     DEFAULT_FRAME_ASPECT_RATIO_HEIGHT);
@@ -153,9 +181,10 @@ public final class CodeScannerView extends ViewGroup {
                     .setFrameCornersRadius(Math.round(DEFAULT_FRAME_CORNERS_RADIUS_DP * density));
             mViewFinderView.setFrameSize(DEFAULT_FRAME_SIZE);
             mAutoFocusButton.setColorFilter(DEFAULT_AUTO_FOCUS_BUTTON_COLOR);
-            mFlashButton.setColorFilter(DEFAULT_FLASH_BUTTON_COLOR);
+            //mFlashButton.setColorFilter(DEFAULT_FLASH_BUTTON_COLOR);
             mAutoFocusButton.setVisibility(DEFAULT_AUTO_FOCUS_BUTTON_VISIBILITY);
             mFlashButton.setVisibility(DEFAULT_FLASH_BUTTON_VISIBILITY);
+            mFlashButton.setPadding(0,30,30,0);
         } else {
             TypedArray a = null;
             try {
@@ -184,10 +213,12 @@ public final class CodeScannerView extends ViewGroup {
                                 DEFAULT_AUTO_FOCUS_BUTTON_VISIBLE));
                 setFlashButtonVisible(a.getBoolean(R.styleable.CodeScannerView_flashButtonVisible,
                         DEFAULT_FLASH_BUTTON_VISIBLE));
+
+
                 setAutoFocusButtonColor(a.getColor(R.styleable.CodeScannerView_autoFocusButtonColor,
                         DEFAULT_AUTO_FOCUS_BUTTON_COLOR));
-                setFlashButtonColor(a.getColor(R.styleable.CodeScannerView_flashButtonColor,
-                        DEFAULT_FLASH_BUTTON_COLOR));
+                //setFlashButtonColor(a.getColor(R.styleable.CodeScannerView_flashButtonColor,
+                //        DEFAULT_FLASH_BUTTON_COLOR));
             } finally {
                 if (a != null) {
                     a.recycle();
@@ -198,6 +229,8 @@ public final class CodeScannerView extends ViewGroup {
         addView(mViewFinderView);
         addView(mAutoFocusButton);
         addView(mFlashButton);
+        addView(mQrGalleryButton);
+        addView(galleryText);
     }
 
     @Override
@@ -481,6 +514,7 @@ public final class CodeScannerView extends ViewGroup {
      */
     public void setFlashButtonVisible(final boolean visible) {
         mFlashButton.setVisibility(visible ? VISIBLE : INVISIBLE);
+        mFlashButton.setPadding(0,20,20,0);
     }
 
     /**
@@ -519,8 +553,8 @@ public final class CodeScannerView extends ViewGroup {
      * @param color Color
      */
     public void setFlashButtonColor(@ColorInt final int color) {
-        mFlashButtonColor = color;
-        mFlashButton.setColorFilter(color);
+        //mFlashButtonColor = color;
+        //mFlashButton.setColorFilter(color);
     }
 
     @NonNull
@@ -593,6 +627,8 @@ public final class CodeScannerView extends ViewGroup {
         final int buttonSize = mButtonSize;
         mAutoFocusButton.layout(0, 0, buttonSize, buttonSize);
         mFlashButton.layout(width - buttonSize, 0, width, buttonSize);
+        mQrGalleryButton.layout(width/2-70,height-70,width/2+buttonSize-70, height/2+buttonSize-70);
+        galleryText.layout(width/2-70,height-70,width/2+buttonSize-70, height/2+buttonSize-70);
     }
 
     interface SizeListener {
